@@ -14,23 +14,24 @@ export default function UseDatabase() {
         const { data, error } = await supabase.from("products").select("*");
         products.value = data;
         if (error) throw error;
+        return data
 
     }
 
     async function getCategories() {
         const { data, error } = await supabase.from("categories").select("*");
         categories.value = data;
+        categories.value.unshift({ id: "all", name: "Все товары" });
         if (error) throw error;
+        return data
 
     }
     async function addNewProduct(form) {
-
         const { data, error } = await supabase
             .from('products')
             .insert([
                 form,
             ], { upsert: false })
-
         if (error) throw error;
         return data
     }

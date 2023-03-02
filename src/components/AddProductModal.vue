@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from "vue";
 import Modal from "@/components/Modal.vue";
-import vSelect from "vue-select";
 import UseDatabase from "@/lib/UseDatabase";
 import useAuthUser from "@/lib/UseAuthUser";
 import { useToast as toast } from "vue-toastification";
@@ -41,7 +40,7 @@ const form = ref({
     description: "",
     photos: imagesList.value,
     date: new Date().getTime(),
-    category: null,
+    category: "0",
     socials: {
         tg: "",
         vk: "",
@@ -60,13 +59,14 @@ const handleAddProduct = async () => {
             user: null,
             description: "",
             date: new Date().toLocaleDateString("ru-Ru"),
-            category: null,
+            category: "0",
             socials: {
                 tg: "",
                 vk: "",
                 wht: "",
             },
         };
+        images.value = [];
         toast().success("Товар добавлен!");
     } catch (error) {
         toast().error(error.message);
@@ -76,52 +76,56 @@ const handleAddProduct = async () => {
 
 <template>
     <Modal @close-modal="$emit('close')">
-        <div class="form">
-            <input type="text" v-model="form.name" placeholder="Имя" />
-            <input type="text" v-model="form.price" placeholder="Цена" />
-            <v-select
-                :options="categories"
-                label="name"
-                v-model="form.category"
-                :reduce="(category) => category.id"
-            ></v-select>
-            <textarea
-                type="text"
-                v-model="form.description"
-                placeholder="описание"
-            />
-            <input type="text" v-model="form.socials.tg" placeholder="тг" />
-            <input type="text" v-model="form.socials.vk" placeholder="vk" />
-            <input
-                type="text"
-                v-model="form.socials.wht"
-                placeholder="whatsapp"
-            />
-            <button class="btn" @click="fileInput.click()">
-                Upload profile picture
-            </button>
-            <input
-                type="file"
-                style="display: none"
-                ref="fileInput"
-                accept="image/*"
-                @change="onFilePicked"
-                multiple
-            />
-            <div class="photos-prev">
-                <img
-                    v-bind:src="img.link"
-                    alt=""
-                    v-for="(img, index) in images"
-                    :key="index"
-                    v-bind:class="{ loading: !img.isLoaded }"
+        <template #title>Добавить товар</template>
+        <template #body>
+            <div class="form">
+                <input type="text" v-model="form.name" placeholder="Имя" />
+                <input type="text" v-model="form.price" placeholder="Цена" />
+                <select v-model="form.category">
+                    <option value="0" disabled>Категория</option>
+                    <option
+                        :value="category.id"
+                        v-for="(category, index) in categories"
+                        :key="index"
+                    >
+                        {{ category.name }}
+                    </option>
+                </select>
+                <textarea
+                    type="text"
+                    v-model="form.description"
+                    placeholder="описание"
                 />
+                <input type="text" v-model="form.socials.tg" placeholder="тг" />
+                <input type="text" v-model="form.socials.vk" placeholder="vk" />
+                <input
+                    type="text"
+                    v-model="form.socials.wht"
+                    placeholder="whatsapp"
+                />
+                <button class="btn" @click="fileInput.click()">
+                    Upload profile picture
+                </button>
+                <input
+                    type="file"
+                    style="display: none"
+                    ref="fileInput"
+                    accept="image/*"
+                    @change="onFilePicked"
+                    multiple
+                />
+                <div class="photos-prev">
+                    <img
+                        v-bind:src="img.link"
+                        alt=""
+                        v-for="(img, index) in images"
+                        :key="index"
+                        v-bind:class="{ loading: !img.isLoaded }"
+                    />
+                </div>
+                <button v-on:click="handleAddProduct()">Отправить</button>
             </div>
-            <button v-on:click="handleAddProduct()">Отправить</button>
-        </div>
-        {{ images }}
-
-        <br />
+        </template>
     </Modal>
 </template>
 
