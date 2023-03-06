@@ -5,6 +5,15 @@ import UseDatabase from "@/lib/UseDatabase";
 import useAuthUser from "@/lib/UseAuthUser";
 import { useToast as toast } from "vue-toastification";
 
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Thumbs, Virtual } from "swiper";
+import customSelect from "custom-select";
+import "swiper/css";
+const thumbsSwiper = ref(null);
+const setThumbsSwiper = (swiper) => {
+    thumbsSwiper.value = swiper;
+};
+
 const emit = defineEmits(["close"]);
 
 const { categories, addNewProduct, uploadImage, imagesList } = UseDatabase();
@@ -79,33 +88,120 @@ const handleAddProduct = async () => {
         <template #title>Добавить товар</template>
         <template #body>
             <div class="form">
-                <input type="text" v-model="form.name" placeholder="Имя" />
-                <input type="text" v-model="form.price" placeholder="Цена" />
-                <select v-model="form.category">
-                    <option value="0" disabled>Категория</option>
-                    <option
-                        :value="category.id"
-                        v-for="(category, index) in categories"
-                        :key="index"
-                    >
-                        {{ category.name }}
-                    </option>
-                </select>
-                <textarea
-                    type="text"
-                    v-model="form.description"
-                    placeholder="описание"
-                />
-                <input type="text" v-model="form.socials.tg" placeholder="тг" />
-                <input type="text" v-model="form.socials.vk" placeholder="vk" />
-                <input
-                    type="text"
-                    v-model="form.socials.wht"
-                    placeholder="whatsapp"
-                />
-                <button class="btn" @click="fileInput.click()">
-                    Upload profile picture
-                </button>
+                <div class="block-top">
+                    <div class="block-top-text">
+                        <div class="block-top-line1">
+                            <input
+                                class="block-top-name"
+                                type="text"
+                                v-model="form.name"
+                                placeholder="Название"
+                            />
+                            <input
+                                class="block-top-price"
+                                type="text"
+                                v-model="form.price"
+                                placeholder="Цена"
+                            />
+                        </div>
+                        <select
+                            v-model="form.category"
+                            class="select-products-modal"
+                        >
+                            <option
+                                :value="category.id"
+                                v-for="(category, index) in categories"
+                                :key="index"
+                            >
+                                {{ category.name }}
+                            </option>
+                        </select>
+                        <textarea
+                            type="text"
+                            v-model="form.description"
+                            placeholder="Описание товара"
+                        />
+                    </div>
+                    <div class="block-top-image">
+                        <button
+                            class="btn-upload"
+                            @click="fileInput.click()"
+                            v-if="images.length == 0"
+                        >
+                            <img
+                                src="@/assets/images/upload-icon.svg"
+                                alt="upload"
+                            />
+                            <span>Загрузите изображение</span>
+                        </button>
+                        <swiper
+                            v-if="images.length != 0"
+                            :modules="[Thumbs, Virtual]"
+                            :thumbs="{ swiper: thumbsSwiper }"
+                            :slides-per-view="1"
+                            :space-between="10"
+                            class="main-slider"
+                        >
+                            <swiper-slide
+                                v-for="(img, index) in images"
+                                :key="index"
+                                :virtualIndex="index"
+                                class="main-slider__slide"
+                            >
+                                <div
+                                    class="img-container"
+                                    v-bind:class="{
+                                        loading: !img.isLoaded,
+                                    }"
+                                >
+                                    <img v-bind:src="img.link" />
+                                </div>
+                            </swiper-slide>
+                        </swiper>
+                        <swiper
+                            :modules="[Thumbs, Virtual]"
+                            watch-slides-progress
+                            @swiper="setThumbsSwiper"
+                            class="thumb-slider"
+                            :space-between="10"
+                        >
+                            <swiper-slide
+                                v-for="(img, index) in images"
+                                :key="index"
+                                :virtualIndex="index"
+                                class="thumb"
+                            >
+                                <div
+                                    class="img-container"
+                                    v-bind:class="{
+                                        loading: !img.isLoaded,
+                                    }"
+                                >
+                                    <img v-bind:src="img.link" />
+                                </div>
+                            </swiper-slide>
+                            <swiper-slide class="thumb">
+                                <button
+                                    class="btn-upload-thumb"
+                                    @click="fileInput.click()"
+                                    v-if="images.length != 0"
+                                >
+                                    <img
+                                        src="@/assets/images/upload-icon.svg"
+                                        alt="upload"
+                                    />
+                                </button>
+                            </swiper-slide>
+                        </swiper>
+                    </div>
+                </div>
+
+                <div class="block-bottom">
+                    <input class="tg" type="text" v-model="form.socials.tg" />
+                    <input class="vk" type="text" v-model="form.socials.vk" />
+                    <input class="wht" type="text" v-model="form.socials.wht" />
+                </div>
+
                 <input
                     type="file"
                     style="display: none"
@@ -114,36 +210,210 @@ const handleAddProduct = async () => {
                     @change="onFilePicked"
                     multiple
                 />
-                <div class="photos-prev">
-                    <img
-                        v-bind:src="img.link"
-                        alt=""
-                        v-for="(img, index) in images"
-                        :key="index"
-                        v-bind:class="{ loading: !img.isLoaded }"
-                    />
-                </div>
-                <button v-on:click="handleAddProduct()">Отправить</button>
+
+                <button class="btn" v-on:click="handleAddProduct()">
+                    Отправить
+                </button>
             </div>
         </template>
     </Modal>
 </template>
 
 <style lang="scss" scoped>
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 40px;
-    img {
-        height: 75px;
-    }
-    img.loading {
-        filter: brightness(40%);
+.main-slider {
+    margin-bottom: 16px;
+    &__slide {
+        width: 100%;
+        height: 328px;
+        border-radius: 20px;
+        overflow: hidden;
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     }
 }
-input,
+.thumb {
+    &.swiper-slide-thumb-active {
+        border: 5px solid #009f81;
+    }
+    transition: border ease 0.3s;
+    width: 75px !important;
+    height: 75px !important;
+    cursor: pointer;
+    border-radius: 20px;
+    overflow: hidden;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+.btn-upload-thumb {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    img {
+        width: 44px;
+        object-fit: contain;
+    }
+}
+.form {
+    .img-container {
+        width: 100%;
+        height: 100%;
+    }
+    .img-container.loading {
+        position: relative;
+        &::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3Csvg xmlns:svg='http://www.w3.org/2000/svg' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.0' width='50px' height='50px' viewBox='0 0 128 128' xml:space='preserve'%3E%3Cg%3E%3Cpath d='M64 9.75A54.25 54.25 0 0 0 9.75 64H0a64 64 0 0 1 128 0h-9.75A54.25 54.25 0 0 0 64 9.75z' fill='%23ffffff'/%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 64 64' to='360 64 64' dur='1800ms' repeatCount='indefinite'%3E%3C/animateTransform%3E%3C/g%3E%3C/svg%3E");
+            z-index: 1000;
+        }
+
+        img {
+            filter: brightness(40%);
+        }
+    }
+}
+input {
+    padding: 20px;
+    background: #d9d9d9;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 24px;
+    & [type="text"] {
+        font-family: inherit;
+        color: #676767;
+    }
+}
+.block-bottom {
+    margin-bottom: 50px;
+    display: flex;
+    column-gap: 40px;
+    input {
+        padding-left: 70px;
+        max-width: 300px;
+    }
+    @media (max-width: 1090px) {
+        column-gap: 20px;
+    }
+    @media (max-width: 1050px) {
+        flex-direction: column;
+        row-gap: 15px;
+    }
+}
+.tg {
+    background: url(../assets/images/tg.svg) left center no-repeat, #d9d9d9;
+}
+.vk {
+    background: url(../assets/images/vk.svg) left center no-repeat, #d9d9d9;
+}
+.wht {
+    background: url(../assets/images/wht.svg) 15px center no-repeat, #d9d9d9;
+}
+
+.block-top {
+    column-gap: 95px;
+    display: flex;
+    @media (max-width: 1090px) {
+        column-gap: 30px;
+    }
+    @media (max-width: 1050px) {
+        flex-direction: column-reverse;
+        row-gap: 15px;
+    }
+}
+.block-top-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.block-top-image {
+    max-width: 370px;
+    flex-grow: 2;
+}
+.block-top-line1 {
+    margin-bottom: 25px;
+    column-gap: 35px;
+    row-gap: 20px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.block-top-name {
+    max-width: 338px;
+    flex-grow: 1;
+    @media (max-width: 500px) {
+        max-width: 100%;
+    }
+}
+
+.block-top-price {
+    max-width: 174px;
+    flex-grow: 1;
+    padding-right: 50px;
+    background: url(../assets/images/rubl.svg) right 20px center no-repeat,
+        #d9d9d9;
+}
+
+.customSelect {
+    margin-bottom: 25px;
+    padding: 20px;
+    max-width: 338px;
+    background: url(../assets/images/down-arrow.svg) right 20px center no-repeat,
+        #d9d9d9;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 24px;
+    color: #676767;
+    cursor: pointer;
+}
+
 textarea {
-    border: 2px solid #333;
+    margin-bottom: 25px;
+    padding: 18px 0 0 20px;
+    border-radius: 20px;
+    height: 235px;
+    background: #d9d9d9;
+    font-weight: 700;
+    font-size: 24px;
+    color: #676767;
+    resize: none;
+}
+
+.btn {
+    padding: 16px 45px;
+    background: #009f81;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 24px;
+    color: #ffffff;
+}
+.btn-upload {
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    font-weight: 500;
+    width: 100%;
+    height: 328px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    color: #878787;
+    border: 15px solid #d9d9d9;
+    border-radius: 30px;
+    img {
+        width: 80px;
+    }
 }
 </style>

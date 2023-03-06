@@ -3,8 +3,8 @@ const emits = defineEmits(["close-modal"]);
 </script>
 <template>
     <Transition name="fade">
-        <div class="authorization-modal" @click="$emit('close-modal')">
-            <div class="authorization-modal-window" @click.stop>
+        <div class="authorization-modal">
+            <div class="authorization-modal-window">
                 <div class="authorization-modal-line">
                     <h2><slot name="title"></slot></h2>
                     <button
@@ -26,21 +26,12 @@ const emits = defineEmits(["close-modal"]);
                 </div>
                 <slot name="body"></slot>
             </div>
+            <div class="overlay" @click="$emit('close-modal')"></div>
         </div>
     </Transition>
 </template>
 
 <style lang="scss">
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
 .close {
     cursor: pointer;
 }
@@ -61,8 +52,16 @@ const emits = defineEmits(["close-modal"]);
     top: 0;
     width: 100%;
     height: 100%;
+    z-index: 100;
+    overflow-y: auto;
+}
+.overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     z-index: 10;
-    overflow-y: hidden;
     background-color: #00000089;
     cursor: pointer;
 }
@@ -101,13 +100,19 @@ const emits = defineEmits(["close-modal"]);
 }
 
 .authorization-modal-window {
-    margin: 0 20px;
+    position: relative;
+    z-index: 20;
+    margin: 0px 20px;
     padding: 32px 35px 50px 60px;
     background-color: #ffffff;
     border-radius: 40px;
     -ms-flex-preferred-size: 1137px;
     flex-basis: 1137px;
     cursor: auto;
+    @media (max-width: 1050px) {
+        overflow-y: auto;
+    }
+    max-height: 99%;
 }
 
 @media (max-width: 500px) {
@@ -117,13 +122,14 @@ const emits = defineEmits(["close-modal"]);
 }
 
 .authorization-modal-line {
-    margin-bottom: 110px;
+    margin-bottom: 60px;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-pack: justify;
     -ms-flex-pack: justify;
     justify-content: space-between;
+    overflow-y: auto;
 }
 
 @media (max-width: 900px) {
@@ -205,6 +211,12 @@ const emits = defineEmits(["close-modal"]);
 
 @media (max-width: 720px) {
     .input-block input[type="text"] {
+        font-size: calc(16px + 27.2 * ((100vw - 320px) / 1196));
+    }
+}
+
+@media (max-width: 720px) {
+    .input-block input[type="password"] {
         font-size: calc(16px + 27.2 * ((100vw - 320px) / 1196));
     }
 }

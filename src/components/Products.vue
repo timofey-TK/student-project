@@ -1,10 +1,14 @@
 <script setup>
-import { ref, onMounted, onUpdated } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { HvrSlider } from "@/lib/hvrSlider";
 import UseDatabase from "@/lib/UseDatabase";
-import Filterizr from "filterizr";
+import useAuthUser from "@/lib/UseAuthUser";
+import customSelect from "custom-select";
+import "@/lib/isotop.js";
 
-const { products, getProducts, getCategories, categories } = UseDatabase();
+const { products, getProducts, getCategories, categories, categorySelect } =
+    UseDatabase();
+const { user } = useAuthUser();
 
 const options = {
     year: "numeric",
@@ -13,6 +17,7 @@ const options = {
     hour: "numeric",
     minute: "numeric",
 };
+
 function kitcut(text, limit) {
     text = text.trim().split(" ");
 
@@ -22,55 +27,99 @@ function kitcut(text, limit) {
     return text.join(" ") + "...";
 }
 
-const categorySelect = ref("0"),
-    searchInput = ref("");
+const searchInput = ref("");
 
-function filterProducts(e) {
-    filterizr.filter(categorySelect.value);
+watch(categorySelect, (cat) => {
+    try {
+        document.querySelector(
+            ".products-section .custom-select-opener span"
+        ).innerHTML = categories.value[cat - 1].name;
+        document
+            .querySelector(".products-section .is-selected")
+            .classList.remove("is-selected");
+    } catch (err) {}
+    filterProducts();
+});
+function filterProducts() {
+    iso.arrange({
+        filter: function (el) {
+            if (categorySelect.value == "user") {
+                return el.getAttribute("data-user") == user.value.id;
+            }
+            var category = el.getAttribute("data-category");
+            return categorySelect.value == "*"
+                ? true
+                : categorySelect.value == category;
+        },
+    });
 }
 function searchProducts(e) {
-    filterizr.search(searchInput.value);
+    iso.arrange({
+        filter: function (el) {
+            var text =
+                el.querySelector(".product-name").textContent.toLowerCase() +
+                el
+                    .querySelector(".product-description")
+                    .textContent.toLowerCase();
+            return text.includes(searchInput.value.toLowerCase());
+        },
+    });
 }
 
-let filterizr;
+const isEmpty = ref(true);
+let iso;
 onMounted(() => {
     getProducts().then(() => {
-        new HvrSlider(".images");
-        filterizr = new Filterizr("#products", {
-            layout: "sameWidth",
-            gridItemsSelector: ".product-card",
-            gutterPixels: 25,
-            spinner: {
-                // Configuration for built-in spinner
-                enabled: true,
-                fillColor: "#2184D0",
-                styles: {
-                    height: "75px",
-                    margin: "0 auto",
-                    width: "75px",
-                    "z-index": 2,
+        setTimeout(() => {
+            new HvrSlider(".images");
+            iso = new Isotope("#products", {
+                itemSelector: ".product-card",
+                getSortData: {
+                    date: "[data-date]",
                 },
-            },
-        });
+                sortBy: "date",
+                sortAscending: false,
+
+                layoutMode: "masonry",
+                masonry: {
+                    fitWidth: true,
+                    columnWidth: ".product-card",
+                    gutter: 35,
+                },
+            });
+        }, 200);
+        isEmpty.value = false;
     });
-    getCategories();
-});
-const isEmpty = ref(false);
-onUpdated(() => {
-    isEmpty.value = document.querySelector("#products").style.height == "0px";
+    getCategories().then(() => {
+        customSelect(document.querySelector(".select-products"));
+        customSelect(document.querySelector(".select-products-modal"));
+        const smoothLinks = document.querySelectorAll(".smooth");
+        for (let smoothLink of smoothLinks) {
+            smoothLink.addEventListener("click", function (e) {
+                e.preventDefault();
+                const id = smoothLink.getAttribute("href");
+                document.querySelector(id).scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            });
+        }
+    });
 });
 </script>
 <template>
-    <section class="products-section">
+    <section class="products-section" id="products-section">
         <div class="products-ui">
             <input
+                placeholder="поиск..."
                 type="text"
                 v-model="searchInput"
                 class="search"
                 @input="searchProducts(e)"
             />
-            <select v-model="categorySelect" @change="filterProducts(e)">
-                <option value="0" disabled>Категория</option>
+            <select class="select-products" v-model="categorySelect">
+                <option value="*">Все товары</option>
+                <option value="user">Мои товары</option>
                 <option
                     :value="category.id"
                     v-for="(category, index) in categories"
@@ -80,68 +129,266 @@ onUpdated(() => {
                 </option>
             </select>
         </div>
-        <div id="products">
-            <div
-                class="product-card"
-                v-for="product in products"
-                :key="product.id"
-                :data-date="product.date"
-                :data-category="product.category"
-                :data-name="product.name"
-            >
-                <p>{{ product.name }}</p>
-                <p>{{ product.price }}</p>
-                <p>
-                    {{
-                        categories.find((el) => el.id == product.category).name
-                    }}
-                </p>
-                <p class="clamp">{{ kitcut(product.description, 25) }}</p>
-                <p>
-                    {{
-                        new Date(Number(product.date)).toLocaleString(
-                            "ru-RU",
-                            options
-                        )
-                    }}
-                </p>
-                <div class="images">
-                    <img
-                        v-bind:src="src"
-                        alt="preview"
-                        v-for="(src, index) in product.photos"
-                        :key="index"
-                    />
+        <Transition name="fade">
+            <div class="products-skeleton" v-show="isEmpty">
+                <div class="product-skeleton-card">
+                    <div class="image skeleton"></div>
+                    <div class="text">
+                        <div class="name skeleton"></div>
+                        <div class="price skeleton"></div>
+                    </div>
+                </div>
+                <div class="product-skeleton-card">
+                    <div class="image skeleton"></div>
+                    <div class="text">
+                        <div class="name skeleton"></div>
+                        <div class="price skeleton"></div>
+                    </div>
+                </div>
+                <div class="product-skeleton-card">
+                    <div class="image skeleton"></div>
+                    <div class="text">
+                        <div class="name skeleton"></div>
+                        <div class="price skeleton"></div>
+                    </div>
+                </div>
+
+                <div class="product-skeleton-card">
+                    <div class="image skeleton"></div>
+                    <div class="text">
+                        <div class="name skeleton"></div>
+                        <div class="price skeleton"></div>
+                    </div>
+                </div>
+                <div class="product-skeleton-card">
+                    <div class="image skeleton"></div>
+                    <div class="text">
+                        <div class="name skeleton"></div>
+                        <div class="price skeleton"></div>
+                    </div>
+                </div>
+                <div class="product-skeleton-card">
+                    <div class="image skeleton"></div>
+                    <div class="text">
+                        <div class="name skeleton"></div>
+                        <div class="price skeleton"></div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Transition>
+        <Transition name="fade">
+            <div id="products" v-show="!isEmpty">
+                <div
+                    class="product-card"
+                    v-for="product in products"
+                    :key="product.id"
+                    :data-date="product.date"
+                    :data-category="product.category"
+                    :data-name="product.name"
+                    :data-user="product.user"
+                >
+                    <div class="images">
+                        <img
+                            v-bind:src="src"
+                            alt="preview"
+                            v-for="(src, index) in product.photos"
+                            :key="index"
+                        />
+                    </div>
+                    <div class="product-text">
+                        <p class="product-name">{{ product.name }}</p>
+                        <p class="product-price">{{ product.price + "₽" }}</p>
+                        <p class="product-description">
+                            {{ kitcut(product.description, 25) }}
+                        </p>
+                        <p class="product-date">
+                            {{
+                                new Date(Number(product.date)).toLocaleString(
+                                    "ru-RU",
+                                    options
+                                )
+                            }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </section>
 </template>
 <style lang="scss">
+@mixin adaptiv-font($pcSize, $mobSize, $width, $minWidth) {
+    $addSize: $pcSize - $mobSize;
+    $addMobSize: $addSize * 1.7;
+    @media (max-width: #{$width + px}) {
+        font-size: calc(
+            #{$mobSize + px} + #{$addMobSize} *
+                ((100vw - #{$minWidth + px}) / 1196)
+        );
+    }
+}
+
+.products-skeleton {
+    max-width: 1200px;
+    @media (max-width: 1250px) {
+        justify-content: center;
+    }
+    display: flex;
+    gap: 35px;
+    position: absolute;
+    flex-wrap: wrap;
+}
+.product-skeleton-card {
+    width: 360px;
+    max-width: 100%;
+    background: #dddbdd;
+    margin-bottom: 35px;
+    border-radius: 30px;
+    padding: 10px;
+    overflow: hidden;
+    .image {
+        border-radius: 30px;
+        width: 100%;
+        height: 230px;
+        background: #a9a9a9;
+    }
+    .text {
+        padding: 15px;
+    }
+    .name,
+    .price {
+        height: 30px;
+        background: #a9a9a9;
+        margin-top: 20px;
+        border-radius: 10px;
+    }
+    .name {
+        width: 90%;
+    }
+    .price {
+        width: 40%;
+    }
+}
+
 .products-ui {
     display: flex;
+    flex-wrap: wrap;
     gap: 30px;
-    margin: 20px;
+    margin: 20px 0;
     align-items: center;
+    @media (max-width: 807px) {
+        justify-content: center;
+        gap: 15px;
+    }
 }
 .search {
-    height: 50px;
-
-    background: #cacaca;
-    padding: 10px;
+    background: url(../assets/images/search.svg) 20px center no-repeat, #fff;
+    box-sizing: border-box;
+    padding: 14px 0 14px 80px;
+    border: 4px solid #009f81;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 26px;
+    @include adaptiv-font(26, 18, 720, 375);
+}
+.authorization-modal .customSelect {
+    margin-bottom: 25px;
+    background: url(../assets/images/down-arrow.svg) right 20px center no-repeat,
+        #d9d9d9;
+    border-radius: 20px;
+    color: #676767;
+    .custom-select-opener {
+        padding: 20px;
+    }
+    .custom-select-panel {
+        background-color: #bdbdbd;
+    }
+    .custom-select-option:hover,
+    .custom-select-option.is-selected {
+        background-color: #d9d9d9;
+    }
+}
+.customSelect {
+    background: url(../assets/images/down-arrowWhite.svg) left 20px center
+            no-repeat,
+        #009f81;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+    width: 310px;
+    max-width: 100%;
+    transition: border-radius 0.3s ease;
+}
+.select-products {
+    padding: 20px 20px 20px 60px;
+    width: 310px;
+    max-width: 100%;
+    background: url(../assets/images/down-arrowWhite.svg) left 20px center
+            no-repeat,
+        #009f81;
+    border-radius: 20px;
+    appearance: none;
+    font-weight: 700;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+}
+option {
+    padding: 0;
 }
 .products-section {
-    min-height: 50vh;
+    overflow-x: hidden;
+    min-height: 100vh;
+    padding: 0 calc(50% - 600px);
+    @media (max-width: 1250px) {
+        padding: 0 20px;
+    }
 }
-
+#products {
+    @media (max-width: 1250px) {
+        margin: 0 auto;
+    }
+    width: 100%;
+    overflow: hidden;
+}
 .product-card {
     background: #009f81;
     border-radius: 30px;
     width: 362px;
-    padding: 7px;
+    max-width: 100%;
+    padding: 8px;
     overflow: hidden;
     height: fit-content;
+    margin-bottom: 35px;
 }
+
+.product-text {
+    color: #fff;
+    padding: 0 13px;
+}
+.product-name {
+    margin-bottom: 5px;
+    font-weight: 800;
+    font-size: 26px;
+}
+.product-price {
+    margin-bottom: 8px;
+    font-weight: 700;
+    font-size: 24px;
+}
+.product-description {
+    margin-bottom: 16px;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.product-date {
+    font-weight: 700;
+    font-size: 16px;
+    color: #d9d9d9;
+}
+
 /* обязательные стили (слайдер картинок для карточек товаров)*/
 .hvr__dots {
     display: flex;
@@ -161,12 +408,17 @@ onUpdated(() => {
     background: #fff;
 }
 .hvr {
-    width: 200px;
+    margin-bottom: 18px;
+    width: 100%;
+    height: 230px;
+    border-radius: 30px;
+    overflow: hidden;
     position: relative;
 }
 .hvr__images {
     position: relative;
     width: 100%;
+    height: 100%;
 }
 .hvr__sectors {
     position: absolute;
@@ -197,9 +449,10 @@ onUpdated(() => {
     width: 100%;
     height: 100%;
 }
-.images {
-    width: 200px;
-    height: 200px;
-    overflow: hidden;
+
+.images,
+.hvr__images {
+    width: 100%;
+    height: 100%;
 }
 </style>

@@ -5,7 +5,9 @@ import axios from 'axios';
 
 const products = ref(null),
     categories = ref([]),
-    imagesList = ref([])
+    imagesList = ref([]),
+    categorySelect = ref("*")
+
 
 export default function UseDatabase() {
     const { supabase } = useSupabase();
@@ -21,7 +23,6 @@ export default function UseDatabase() {
     async function getCategories() {
         const { data, error } = await supabase.from("categories").select("*");
         categories.value = data;
-        categories.value.unshift({ id: "all", name: "Все товары" });
         if (error) throw error;
         return data
 
@@ -56,5 +57,5 @@ export default function UseDatabase() {
     function isProductsLoaded() {
         return !!products.value
     }
-    return { getProducts, products, getCategories, categories, addNewProduct, uploadImage, imagesList, isProductsLoaded };
+    return { getProducts, products, getCategories, categories, addNewProduct, uploadImage, imagesList, isProductsLoaded, categorySelect };
 }

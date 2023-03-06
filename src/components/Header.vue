@@ -4,20 +4,30 @@ import useAuthUser from "@/lib/UseAuthUser";
 import AddProductModal from "./AddProductModal.vue";
 import RegistrationModal from "@/components/RegistrationModal.vue";
 import LogInModal from "./LogInModal.vue";
+import UseDatabase from "@/lib/UseDatabase";
+import { useToast as toast } from "vue-toastification";
 
-const categories = [
-    "Бутылки",
-    "Бытовая техника",
-    "Полки",
-    "Одежда",
-    "Концтавары",
-    "Бумага",
-];
+const { categories, categorySelect } = UseDatabase();
+
 const isLogInModalOpen = ref(false),
     isRegistrationModalOpen = ref(false),
     isAddProductModalOpen = ref(false);
 
 const { isLoggedIn, user, logout } = useAuthUser();
+
+function handleProductModal() {
+    if (!isLoggedIn()) {
+        toast().warning("Для добавления товара необходимо авторизоваться!");
+    } else {
+        isAddProductModalOpen.value = true;
+    }
+}
+const categoriesSliced = () => {
+    return categories.value.slice(0, 6);
+};
+const handleCategory = (id) => {
+    categorySelect.value = id;
+};
 </script>
 <template>
     <RegistrationModal
@@ -43,7 +53,7 @@ const { isLoggedIn, user, logout } = useAuthUser();
                 </div>
                 <div class="account" v-else>
                     <button @click="logout" class="logout">Выйти</button>
-                    <p>{{ user.user_metadata?.name }}</p>
+                    <p class="account-name">{{ user.user_metadata?.name }}</p>
                     <img
                         class="avatar"
                         :src="
@@ -57,26 +67,31 @@ const { isLoggedIn, user, logout } = useAuthUser();
             <div class="logo">
                 <h1>студ.маркет</h1>
             </div>
+
             <ul class="list">
                 <li
-                    class="list_item"
-                    v-for="(categorie, index) in categories"
+                    v-for="(category, index) in categoriesSliced()"
                     :key="index"
+                    data-category="category.id"
                 >
-                    {{ categorie }}
+                    <a
+                        class="list_item smooth"
+                        href="#products-section"
+                        @click="handleCategory(category.id)"
+                        >{{ category.name }}</a
+                    >
                 </li>
             </ul>
             <div class="buttons">
-                <button class="btn btn-buy">Купить</button>
-                <button
-                    class="btn btn-sell"
-                    @click="isAddProductModalOpen = true"
+                <a href="#products-section" class="btn btn-buy smooth"
+                    >Купить</a
                 >
+                <button class="btn btn-sell" @click="handleProductModal()">
                     Продать
                 </button>
             </div>
             <div class="arrow">
-                <a href="#"
+                <a href="#products-section" class="smooth"
                     ><img
                         src="@/assets/images/arrow.svg"
                         alt="button arrow down"
@@ -102,6 +117,15 @@ const { isLoggedIn, user, logout } = useAuthUser();
     display: flex;
     align-items: center;
     gap: 20px;
+}
+.account-name {
+    text-align: right;
+}
+@media (max-width: 700px) {
+    .account {
+        justify-content: center;
+        width: 100%;
+    }
 }
 header {
     padding: 65px 0 0 0;
@@ -191,7 +215,7 @@ nav a:hover {
     }
 }
 
-@media (max-width: 630px) {
+@media (max-width: 700px) {
     .logotype {
         display: none;
     }
@@ -205,7 +229,7 @@ nav a:hover {
     column-gap: 30px;
 }
 
-@media (max-width: 630px) {
+@media (max-width: 700px) {
     .authorization {
         -webkit-box-pack: center;
         -ms-flex-pack: center;
@@ -276,6 +300,8 @@ nav a:hover {
 }
 
 .list_item {
+    text-decoration: none;
+    color: inherit;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -350,6 +376,9 @@ nav a:hover {
 }
 
 @media (max-width: 580px) {
+    .buttons {
+        gap: 20px;
+    }
     .btn {
         border-radius: 30px;
     }
