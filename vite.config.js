@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     host: true
   },
-  base: "/student-project/",
+  base: "",
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
