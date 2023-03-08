@@ -103,7 +103,7 @@ const emits = defineEmits(["close-modal"]);
     position: relative;
     z-index: 20;
     margin: 0px 20px;
-    padding: 32px 35px 50px 60px;
+    padding: 40px;
     background-color: #ffffff;
     border-radius: 40px;
     -ms-flex-preferred-size: 1137px;
@@ -117,7 +117,7 @@ const emits = defineEmits(["close-modal"]);
 
 @media (max-width: 500px) {
     .authorization-modal-window {
-        padding: 32px 25px 50px 50px;
+        padding: 20px;
     }
 }
 

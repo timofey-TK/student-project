@@ -307,7 +307,7 @@ input {
         column-gap: 20px;
     }
     @media (max-width: 1050px) {
-        flex-direction: column;
+        flex-wrap: wrap;
         row-gap: 15px;
     }
 }
@@ -330,6 +330,15 @@ input {
     @media (max-width: 1050px) {
         flex-direction: column-reverse;
         row-gap: 15px;
+        .block-top-image {
+            align-self: center;
+        }
+    }
+    @media (max-width: 500px) {
+        .block-top-image {
+            max-width: 100%;
+            align-self: center;
+        }
     }
 }
 .block-top-text {
@@ -399,6 +408,7 @@ textarea {
     color: #ffffff;
 }
 .btn-upload {
+    padding: 15px;
     display: flex;
     flex-direction: column;
     font-size: 16px;

@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from "vue";
 import { HvrSlider } from "@/lib/hvrSlider";
 import UseDatabase from "@/lib/UseDatabase";
 import useAuthUser from "@/lib/UseAuthUser";
+import { useToast as toast } from "vue-toastification";
 import customSelect from "custom-select";
 import "@/lib/isotop.js";
 
@@ -41,6 +42,12 @@ watch(categorySelect, (cat) => {
     filterProducts();
 });
 function filterProducts() {
+    if (categorySelect.value == "user") {
+        if (!user.value) {
+            toast().warning("Для просмотра войдите в аккаунт!");
+            return true;
+        }
+    }
     iso.arrange({
         filter: function (el) {
             if (categorySelect.value == "user") {

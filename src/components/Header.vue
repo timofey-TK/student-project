@@ -46,10 +46,10 @@ const handleCategory = (id) => {
                     <img src="@/assets/images/logo.svg" alt="logotype" />
                 </div>
                 <div class="authorization" v-if="!isLoggedIn()">
-                    <a href="#" @click="isLogInModalOpen = true">Войти</a>
-                    <a href="#" @click="isRegistrationModalOpen = true"
-                        >Регистрация</a
-                    >
+                    <button @click="isLogInModalOpen = true">Войти</button>
+                    <button @click="isRegistrationModalOpen = true">
+                        Регистрация
+                    </button>
                 </div>
                 <div class="account" v-else>
                     <button @click="logout" class="logout">Выйти</button>
@@ -192,25 +192,27 @@ nav {
     }
 }
 
-nav a {
+nav button {
     display: block;
     color: #333333;
     font-weight: 500;
     transition: color ease 0.3s;
+    font-size: inherit;
+    background: none;
 }
 
-nav a:hover {
+nav button:not(.logout):hover {
     color: #009f81;
 }
 
 @media (max-width: 915px) {
-    nav a {
+    nav button {
         font-size: calc(18px + 3.4 * ((100vw - 725px) / 1196));
     }
 }
 
 @media (max-width: 630px) {
-    nav a {
+    nav button {
         font-size: 20px;
     }
 }
