@@ -422,6 +422,7 @@ onMounted(() => {
     }
 }
 .customSelect {
+    z-index: 10;
     background: url(../assets/images/down-arrowWhite.svg) left 20px center
             no-repeat,
         #009f81;
