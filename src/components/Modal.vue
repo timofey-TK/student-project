@@ -111,9 +111,7 @@ const emits = defineEmits(["close-modal"]);
     -ms-flex-preferred-size: 1137px;
     flex-basis: 1137px;
     cursor: auto;
-    @media (max-width: 1050px) {
-        overflow-y: auto;
-    }
+    overflow-y: auto;
     @media (max-width: 800px) {
         border-radius: 30px;
     }

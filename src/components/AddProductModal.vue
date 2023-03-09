@@ -65,6 +65,7 @@ const form = ref({
 
 const clearForm = async (event) => {
     form.value = {
+        photos: imagesList.value,
         name: "",
         price: null,
         user: null,
@@ -78,6 +79,7 @@ const clearForm = async (event) => {
         },
     };
     images.value = [];
+    imagesList.value = [];
 };
 
 const isAddBtnDisabled = ref(false);
@@ -104,14 +106,16 @@ const handleAddProduct = async () => {
     }
     isAddBtnDisabled.value = true;
     try {
-        await addNewProduct(form.value);
-        emit("close");
-        clearForm();
-        images.value = [];
-        toast().success("Товар добавлен!");
-        isAddBtnDisabled.value = false;
+        addNewProduct(form.value).then(() => {
+            emit("close");
+            clearForm();
+            images.value = [];
+            toast().success("Товар добавлен!");
+            isAddBtnDisabled.value = false;
+        });
     } catch (error) {
         toast().error(error.message);
+        isAddBtnDisabled.value = false;
     }
 };
 </script>
@@ -488,6 +492,27 @@ textarea {
     font-weight: 700;
     font-size: 24px;
     color: #ffffff;
+    position: relative;
+    &::before {
+        transition: all ease 0.3s;
+        border-radius: 20px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        content: "";
+        z-index: 10;
+    }
+    &[disabled] {
+        &::before {
+            background: #006956;
+            content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3Csvg xmlns:svg='http://www.w3.org/2000/svg' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.0' width='50px' height='50px' viewBox='0 0 128 128' xml:space='preserve'%3E%3Cg%3E%3Cpath d='M64 9.75A54.25 54.25 0 0 0 9.75 64H0a64 64 0 0 1 128 0h-9.75A54.25 54.25 0 0 0 64 9.75z' fill='%23ffffff'/%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 64 64' to='360 64 64' dur='1800ms' repeatCount='indefinite'%3E%3C/animateTransform%3E%3C/g%3E%3C/svg%3E");
+        }
+    }
 }
 .clear-btn {
     background-color: #ff5252;
