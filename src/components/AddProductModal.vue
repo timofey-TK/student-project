@@ -62,6 +62,24 @@ const form = ref({
         wht: "",
     },
 });
+
+const clearForm = async (event) => {
+    form.value = {
+        name: "",
+        price: null,
+        user: null,
+        description: "",
+        date: new Date().toLocaleDateString("ru-Ru"),
+        category: "0",
+        socials: {
+            tg: "",
+            vk: "",
+            wht: "",
+        },
+    };
+    images.value = [];
+};
+
 const isAddBtnDisabled = ref(false);
 const handleAddProduct = async () => {
     form.value.user = user.value.id;
@@ -88,19 +106,7 @@ const handleAddProduct = async () => {
     try {
         await addNewProduct(form.value);
         emit("close");
-        form.value = {
-            name: "",
-            price: null,
-            user: null,
-            description: "",
-            date: new Date().toLocaleDateString("ru-Ru"),
-            category: "0",
-            socials: {
-                tg: "",
-                vk: "",
-                wht: "",
-            },
-        };
+        clearForm();
         images.value = [];
         toast().success("Товар добавлен!");
         isAddBtnDisabled.value = false;
@@ -262,6 +268,9 @@ const handleAddProduct = async () => {
                     v-on:click="handleAddProduct()"
                 >
                     Отправить
+                </button>
+                <button class="btn clear-btn" v-on:click="clearForm()">
+                    Очистить
                 </button>
             </div>
         </template>
@@ -471,6 +480,10 @@ textarea {
     font-weight: 700;
     font-size: 24px;
     color: #ffffff;
+    margin-right: 25px;
+}
+.clear-btn {
+    background-color: #ff5252;
 }
 .btn-upload {
     padding: 15px;

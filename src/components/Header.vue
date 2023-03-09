@@ -114,7 +114,7 @@ const handleCategory = (id) => {
 .logout {
     font-size: inherit;
     border: none;
-    background: red;
+    background: #ff5252;
     padding: 7px;
     border-radius: 13px;
     color: #fff;
