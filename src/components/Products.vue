@@ -313,7 +313,7 @@ onMounted(() => {
         }
     }
     .swiper-button-disabled {
-        opacity: 0.1 !important;
+        opacity: 0 !important;
         cursor: auto;
     }
     .swiper-button-next {
