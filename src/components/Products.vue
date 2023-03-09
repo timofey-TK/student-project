@@ -36,7 +36,9 @@ watch(categorySelect, (cat) => {
     try {
         document.querySelector(
             ".products-section .custom-select-opener span"
-        ).innerHTML = categories.value[cat - 1].name;
+        ).innerHTML = categories.value.find(
+            (el) => el.id == categorySelect.value
+        ).name;
         document
             .querySelector(".products-section .is-selected")
             .classList.remove("is-selected");
