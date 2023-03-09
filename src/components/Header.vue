@@ -110,7 +110,7 @@ const handleCategory = (id) => {
         </div>
     </header>
 </template>
-<style scoped>
+<style scoped lang="scss">
 .logout {
     font-size: inherit;
     border: none;
@@ -194,6 +194,9 @@ nav {
     background-color: rgba(255, 255, 255, 0.5);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    @media (max-width: 800px) {
+        padding: 13px 15px;
+    }
 }
 
 @media (max-width: 890px) {
