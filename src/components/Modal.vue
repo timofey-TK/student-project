@@ -112,10 +112,17 @@ const emits = defineEmits(["close-modal"]);
     flex-basis: 1137px;
     cursor: auto;
     overflow-y: auto;
+    max-height: 99%;
+    @media (min-width: 1000px) {
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+        scrollbar-width: none; /* Firefox */
+    }
     @media (max-width: 800px) {
         border-radius: 30px;
     }
-    max-height: 99%;
 }
 
 @media (max-width: 500px) {
