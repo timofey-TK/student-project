@@ -5,6 +5,8 @@ import UseDatabase from "@/lib/UseDatabase";
 import useAuthUser from "@/lib/UseAuthUser";
 import { useToast as toast } from "vue-toastification";
 import customSelect from "custom-select";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Navigation, Pagination } from "swiper";
 import "@/lib/isotop.js";
 
 const { products, getProducts, getCategories, categories, categorySelect } =
@@ -194,13 +196,25 @@ onMounted(() => {
                     :data-name="product.name"
                     :data-user="product.user"
                 >
-                    <div class="images">
-                        <img
-                            v-bind:src="src"
-                            alt="preview"
+                    <swiper
+                        :modules="[Navigation, Pagination]"
+                        :slides-per-view="1"
+                        :space-between="10"
+                        navigation
+                        :pagination="{ clickable: true }"
+                        class="product-card__images"
+                        v-if="product.photos.length > 1"
+                    >
+                        <swiper-slide
                             v-for="(src, index) in product.photos"
                             :key="index"
-                        />
+                            :virtualIndex="index"
+                        >
+                            <img v-bind:src="src" alt="preview" />
+                        </swiper-slide>
+                    </swiper>
+                    <div class="image" v-else>
+                        <img v-bind:src="product.photos[0]" alt="preview" />
                     </div>
                     <div class="product-text">
                         <p class="product-name">{{ product.name }}</p>
@@ -208,14 +222,16 @@ onMounted(() => {
                         <p class="product-description">
                             {{ kitcut(product.description, 25) }}
                         </p>
-                        <p class="product-date">
-                            {{
-                                new Date(Number(product.date)).toLocaleString(
-                                    "ru-RU",
-                                    options
-                                )
-                            }}
-                        </p>
+                        <div class="card-bottom">
+                            <p class="product-author">{{ product.author }}</p>
+                            <p class="product-date">
+                                {{
+                                    new Date(
+                                        Number(product.date)
+                                    ).toLocaleString("ru-RU", options)
+                                }}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -234,10 +250,100 @@ onMounted(() => {
     }
 }
 
+.product-card__images {
+    &:hover {
+        .swiper-button-next,
+        .swiper-button-prev {
+            opacity: 0.7;
+        }
+    }
+    @media (max-width: 800px) {
+        .swiper-button-next,
+        .swiper-button-prev {
+            display: none;
+        }
+    }
+    border-radius: 30px;
+    height: 250px;
+    margin-bottom: 10px;
+    position: relative;
+    img {
+        image-rendering: crisp-edges;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .swiper-pagination {
+        position: absolute;
+        bottom: 10px;
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        z-index: 1;
+        &-bullet {
+            cursor: pointer;
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 100%;
+            border: 2px solid #fff;
+            &-active {
+                background: #fff;
+            }
+        }
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        position: absolute;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        z-index: 1;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: opacity ease 0.3s;
+        &:hover {
+            opacity: 0.9;
+        }
+    }
+    .swiper-button-disabled {
+        opacity: 0.1 !important;
+        cursor: auto;
+    }
+    .swiper-button-next {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' style='fill: rgba(255, 255, 255, 1);transform: ;msFilter:;'%3E%3Cpath d='M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z'%3E%3C/path%3E%3C/svg%3E");
+        right: 0;
+    }
+    .swiper-button-prev {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' style='fill: rgba(255, 255, 255, 1);transform: ;msFilter:;'%3E%3Cpath d='M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z'%3E%3C/path%3E%3C/svg%3E");
+        left: 0;
+    }
+}
+.product-card .image {
+    border-radius: 30px;
+    height: 250px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
 .products-skeleton {
     max-width: 1200px;
+    width: 100%;
     @media (max-width: 1250px) {
         justify-content: center;
+    }
+    @media (max-width: 400px) {
+        position: relative;
     }
     display: flex;
     gap: 35px;
@@ -247,6 +353,7 @@ onMounted(() => {
 .product-skeleton-card {
     width: 360px;
     max-width: 100%;
+    box-sizing: border-box;
     background: #dddbdd;
     margin-bottom: 35px;
     border-radius: 30px;
@@ -326,6 +433,9 @@ onMounted(() => {
     width: 310px;
     max-width: 100%;
     transition: border-radius 0.3s ease;
+    @media (max-width: 720px) {
+        font-size: calc(16px + 27.2 * ((100vw - 320px) / 1196));
+    }
 }
 .select-products {
     padding: 20px 20px 20px 60px;
@@ -345,6 +455,7 @@ option {
     padding: 0;
 }
 .products-section {
+    position: relative;
     overflow-x: hidden;
     min-height: 100vh;
     padding: 0 calc(50% - 600px);
@@ -389,55 +500,17 @@ option {
     font-weight: 500;
     font-size: 16px;
 }
-
-.product-date {
+.card-bottom {
+    display: flex;
+    justify-content: space-between;
+}
+.product-date,
+.product-author {
     font-weight: 700;
     font-size: 16px;
     color: #d9d9d9;
 }
 
-/* обязательные стили (слайдер картинок для карточек товаров)*/
-.hvr__dots {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    position: relative;
-    top: -20px;
-}
-.hvr__dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 100%;
-    border: 2px solid #fff;
-}
-.hvr__dot--active {
-    background: #fff;
-}
-.hvr {
-    margin-bottom: 18px;
-    width: 100%;
-    height: 230px;
-    border-radius: 30px;
-    overflow: hidden;
-    position: relative;
-}
-.hvr__images {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.hvr__sectors {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-}
-.hvr__sector {
-    flex-grow: 1;
-}
 .slide-fade-enter-active {
     transition: all 0.3s ease-out;
 }
@@ -450,16 +523,5 @@ option {
 .slide-fade-leave-to {
     transform: translateX(20px);
     opacity: 0;
-}
-.images img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-}
-
-.images,
-.hvr__images {
-    width: 100%;
-    height: 100%;
 }
 </style>

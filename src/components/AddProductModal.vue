@@ -4,11 +4,11 @@ import Modal from "@/components/Modal.vue";
 import UseDatabase from "@/lib/UseDatabase";
 import useAuthUser from "@/lib/UseAuthUser";
 import { useToast as toast } from "vue-toastification";
-
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Thumbs, Virtual } from "swiper";
 import customSelect from "custom-select";
 import "swiper/css";
+
 const thumbsSwiper = ref(null);
 const setThumbsSwiper = (swiper) => {
     thumbsSwiper.value = swiper;
@@ -27,7 +27,6 @@ const onFilePicked = async (event) => {
     const files = event.target.files;
 
     if (images.value.length >= maxImgs || files.length > maxImgs) {
-        console.log(images.value);
         toast().warning(`Максимум ${maxImgs} изображений`);
         return;
     }
@@ -63,9 +62,29 @@ const form = ref({
         wht: "",
     },
 });
-
+const isAddBtnDisabled = ref(false);
 const handleAddProduct = async () => {
     form.value.user = user.value.id;
+    form.value.author = user.value.user_metadata.name;
+    if (form.value.photos.length == 0) {
+        toast().warning("Добавьте хотя бы одно фото");
+        return;
+    }
+    if (form.value.name == "" || form.value.price == "") {
+        toast().warning("Поля имени и цены не должны быть пустыми");
+        return;
+    }
+    if (
+        !(
+            form.value.socials.tg != "" ||
+            form.value.socials.vk != "" ||
+            form.value.socials.wht != ""
+        )
+    ) {
+        toast().warning("Оставьте ссылку хотя бы на одну соц.сеть для связи");
+        return;
+    }
+    isAddBtnDisabled.value = true;
     try {
         await addNewProduct(form.value);
         emit("close");
@@ -84,6 +103,7 @@ const handleAddProduct = async () => {
         };
         images.value = [];
         toast().success("Товар добавлен!");
+        isAddBtnDisabled.value = false;
     } catch (error) {
         toast().error(error.message);
     }
@@ -205,21 +225,42 @@ const handleAddProduct = async () => {
                 </div>
 
                 <div class="block-bottom">
-                    <input class="tg" type="text" v-model="form.socials.tg" />
-                    <input class="vk" type="text" v-model="form.socials.vk" />
-                    <input class="wht" type="text" v-model="form.socials.wht" />
+                    <input
+                        class="tg"
+                        type="text"
+                        placeholder="@name"
+                        v-model="form.socials.tg"
+                    />
+                    <input
+                        class="vk"
+                        type="text"
+                        placeholder="id"
+                        v-model="form.socials.vk"
+                    />
+                    <input
+                        class="wht"
+                        type="tel"
+                        data-tel-input
+                        placeholder="8 (918) 999-99-99"
+                        maxlength="18"
+                        v-model="form.socials.wht"
+                    />
                 </div>
 
                 <input
                     type="file"
                     style="display: none"
                     ref="fileInput"
-                    accept="image/*"
+                    accept=".png, .jpg, .jpeg, .gif"
                     @change="onFilePicked"
                     multiple
                 />
 
-                <button class="btn" v-on:click="handleAddProduct()">
+                <button
+                    class="btn"
+                    :disabled="isAddBtnDisabled"
+                    v-on:click="handleAddProduct()"
+                >
                     Отправить
                 </button>
             </div>
@@ -239,6 +280,9 @@ const handleAddProduct = async () => {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        @media (max-width: 800px) {
+            height: 260px;
         }
     }
 }
@@ -298,9 +342,11 @@ input {
     border-radius: 20px;
     font-weight: 700;
     font-size: 24px;
-    & [type="text"] {
-        font-family: inherit;
-        color: #676767;
+    max-width: 100%;
+    font-family: inherit;
+    color: #676767;
+    @media (max-width: 720px) {
+        font-size: calc(16px + 27.2 * ((100vw - 320px) / 1196));
     }
 }
 .block-bottom {
@@ -308,6 +354,7 @@ input {
     display: flex;
     column-gap: 40px;
     input {
+        font-size: 20px;
         padding-left: 70px;
         max-width: 300px;
     }
@@ -317,6 +364,12 @@ input {
     @media (max-width: 1050px) {
         flex-wrap: wrap;
         row-gap: 15px;
+    }
+    @media (max-width: 500px) {
+        max-width: 100%;
+        input {
+            max-width: 100%;
+        }
     }
 }
 .tg {
@@ -405,6 +458,10 @@ textarea {
     font-size: 24px;
     color: #676767;
     resize: none;
+    max-width: 100%;
+    @media (max-width: 720px) {
+        font-size: calc(16px + 27.2 * ((100vw - 320px) / 1196));
+    }
 }
 
 .btn {
@@ -432,6 +489,9 @@ textarea {
     border-radius: 30px;
     img {
         width: 80px;
+    }
+    @media (max-width: 800px) {
+        height: 260px;
     }
 }
 </style>
