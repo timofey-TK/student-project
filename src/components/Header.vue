@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import useAuthUser from "@/lib/UseAuthUser";
 import AddProductModal from "./AddProductModal.vue";
 import RegistrationModal from "@/components/RegistrationModal.vue";
@@ -9,9 +9,14 @@ import { useToast as toast } from "vue-toastification";
 
 const { categories, categorySelect } = UseDatabase();
 
-const isLogInModalOpen = ref(false),
-    isRegistrationModalOpen = ref(false),
-    isAddProductModalOpen = ref(false);
+const modal = ref({
+    isLogInModalOpen: false,
+    isRegistrationModalOpen: false,
+    isAddProductModalOpen: false,
+});
+watch(modal.value, () => {
+    document.querySelector("body").classList.toggle("unscrollable");
+});
 
 const { isLoggedIn, user, logout } = useAuthUser();
 
@@ -19,7 +24,7 @@ function handleProductModal() {
     if (!isLoggedIn()) {
         toast().warning("Для добавления товара необходимо авторизоваться!");
     } else {
-        isAddProductModalOpen.value = true;
+        modal.value.isAddProductModalOpen = true;
     }
 }
 const categoriesSliced = () => {
@@ -31,13 +36,16 @@ const handleCategory = (id) => {
 </script>
 <template>
     <RegistrationModal
-        v-show="isRegistrationModalOpen"
-        @close="isRegistrationModalOpen = false"
+        v-show="modal.isRegistrationModalOpen"
+        @close="modal.isRegistrationModalOpen = false"
     />
-    <LogInModal v-show="isLogInModalOpen" @close="isLogInModalOpen = false" />
+    <LogInModal
+        v-show="modal.isLogInModalOpen"
+        @close="modal.isLogInModalOpen = false"
+    />
     <AddProductModal
-        v-show="isAddProductModalOpen"
-        @close="isAddProductModalOpen = false"
+        v-show="modal.isAddProductModalOpen"
+        @close="modal.isAddProductModalOpen = false"
     />
     <header id="header">
         <div class="container">
@@ -46,8 +54,10 @@ const handleCategory = (id) => {
                     <img src="@/assets/images/logo.svg" alt="logotype" />
                 </div>
                 <div class="authorization" v-if="!isLoggedIn()">
-                    <button @click="isLogInModalOpen = true">Войти</button>
-                    <button @click="isRegistrationModalOpen = true">
+                    <button @click="modal.isLogInModalOpen = true">
+                        Войти
+                    </button>
+                    <button @click="modal.isRegistrationModalOpen = true">
                         Регистрация
                     </button>
                 </div>

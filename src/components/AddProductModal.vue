@@ -23,7 +23,14 @@ const images = ref([]);
 const fileInput = ref(null);
 
 const onFilePicked = async (event) => {
+    const maxImgs = 5;
     const files = event.target.files;
+
+    if (images.value.length >= maxImgs || files.length > maxImgs) {
+        console.log(images.value);
+        toast().warning(`Максимум ${maxImgs} изображений`);
+        return;
+    }
     try {
         for (let file of files) {
             let url = URL.createObjectURL(file);
@@ -164,6 +171,7 @@ const handleAddProduct = async () => {
                             @swiper="setThumbsSwiper"
                             class="thumb-slider"
                             :space-between="10"
+                            :slides-per-view="3"
                         >
                             <swiper-slide
                                 v-for="(img, index) in images"

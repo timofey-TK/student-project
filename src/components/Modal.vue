@@ -102,7 +102,7 @@ const emits = defineEmits(["close-modal"]);
 .authorization-modal-window {
     position: relative;
     z-index: 20;
-    margin: 0px 20px;
+    margin: 0 20px;
     padding: 40px;
     background-color: #ffffff;
     border-radius: 40px;
@@ -111,6 +111,9 @@ const emits = defineEmits(["close-modal"]);
     cursor: auto;
     @media (max-width: 1050px) {
         overflow-y: auto;
+    }
+    @media (max-width: 800px) {
+        border-radius: 30px;
     }
     max-height: 99%;
 }
@@ -222,6 +225,7 @@ const emits = defineEmits(["close-modal"]);
 }
 
 .authorization-modal-btn {
+    max-width: 100%;
     margin: 0 auto;
     padding: 16px 45px;
     display: block;
@@ -230,5 +234,11 @@ const emits = defineEmits(["close-modal"]);
     color: #fff;
     background: #009f81;
     border-radius: 20px;
+    @media (max-width: 440px) {
+        font-size: 20px;
+    }
+    @media (max-width: 385px) {
+        font-size: 18px;
+    }
 }
 </style>

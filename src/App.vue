@@ -10,6 +10,9 @@ import Header from "@/components/Header.vue";
 </template>
 
 <style lang="scss">
+.unscrollable {
+    overflow: hidden;
+}
 body {
     overflow-x: hidden;
 }
