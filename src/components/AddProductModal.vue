@@ -262,16 +262,18 @@ const handleAddProduct = async () => {
                     multiple
                 />
 
-                <button
-                    class="btn"
-                    :disabled="isAddBtnDisabled"
-                    v-on:click="handleAddProduct()"
-                >
-                    Отправить
-                </button>
-                <button class="btn clear-btn" v-on:click="clearForm()">
-                    Очистить
-                </button>
+                <div class="btns">
+                    <button
+                        class="btn"
+                        :disabled="isAddBtnDisabled"
+                        v-on:click="handleAddProduct()"
+                    >
+                        Отправить
+                    </button>
+                    <button class="btn clear-btn" v-on:click="clearForm()">
+                        Очистить
+                    </button>
+                </div>
             </div>
         </template>
     </Modal>
@@ -473,6 +475,12 @@ textarea {
     }
 }
 
+.btns {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 25px;
+    row-gap: 15px;
+}
 .btn {
     padding: 16px 45px;
     background: #009f81;
@@ -480,7 +488,6 @@ textarea {
     font-weight: 700;
     font-size: 24px;
     color: #ffffff;
-    margin-right: 25px;
 }
 .clear-btn {
     background-color: #ff5252;
