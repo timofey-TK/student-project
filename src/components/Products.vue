@@ -121,6 +121,10 @@ onMounted(() => {
 
 const currentProduct = ref(null),
     isProductModal = ref(false);
+
+watch(isProductModal, () => {
+    document.querySelector("body").classList.toggle("unscrollable");
+});
 </script>
 <template>
     <ProductModal

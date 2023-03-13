@@ -240,6 +240,7 @@ function handleSocials(soc) {
 .product-image {
     margin-bottom: 40px;
     width: 400px;
+    max-width: 100%;
     img {
         width: 100%;
         height: 100%;
