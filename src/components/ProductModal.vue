@@ -28,9 +28,18 @@ function handleSocials(soc) {
             ? props.product?.socials.vk.replace("@", "")
             : "https://vk.com/" + props.product?.socials.vk.replace("@", "");
     } else {
-        link =
-            "https://wa.me/" +
-            props.product?.socials.wht.replace(/[\s\(\)\+\-]/g, "");
+        let tel = props.product?.socials.wht;
+        if (!tel) {
+            return;
+        }
+        if (tel[0] == "8") {
+            link =
+                "https://wa.me/" +
+                "7" +
+                tel.slice(1).replace(/[\s\(\)\+\-]/g, "");
+        } else {
+            link = "https://wa.me/" + tel.replace(/[\s\(\)\+\-]/g, "");
+        }
     }
     return link;
 }
