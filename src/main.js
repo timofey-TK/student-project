@@ -6,6 +6,7 @@ import "@/lib/phoneinput";
 import 'vue-toastification/dist/index.css';
 import './assets/base.css'
 import '@/assets/custom-select.css'
+import "swiper/css";
 
 const app = createApp(App);
 app.use(Toast);

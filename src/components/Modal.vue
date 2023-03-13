@@ -75,6 +75,8 @@ const emits = defineEmits(["close-modal"]);
 .authorization-modal-close {
     width: 70px;
     height: 70px;
+    min-width: 70px;
+    min-height: 70px;
     border-radius: 100%;
     background: #009f81;
     display: flex;
@@ -94,6 +96,8 @@ const emits = defineEmits(["close-modal"]);
     .authorization-modal-close {
         width: 40px;
         height: 40px;
+        min-width: 40px;
+        min-height: 40px;
     }
     .authorization-modal-close svg {
         width: 20px;
@@ -132,6 +136,7 @@ const emits = defineEmits(["close-modal"]);
 }
 
 .authorization-modal-line {
+    overflow: hidden;
     margin-bottom: 60px;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -144,6 +149,7 @@ const emits = defineEmits(["close-modal"]);
 
 @media (max-width: 900px) {
     .authorization-modal-line {
+        overflow: hidden;
         margin-bottom: calc(40px + 119 * ((100vw - 320px) / 1196));
     }
 }

@@ -7,7 +7,6 @@ import { useToast as toast } from "vue-toastification";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Thumbs, Virtual } from "swiper";
 import customSelect from "custom-select";
-import "swiper/css";
 
 const thumbsSwiper = ref(null);
 const setThumbsSwiper = (swiper) => {
@@ -23,7 +22,8 @@ const images = ref([]);
 const fileInput = ref(null);
 
 const onFilePicked = async (event) => {
-    const maxImgs = 5;
+    const maxImgs = 5,
+        maxSize = 10 * 1024 * 1024;
     const files = event.target.files;
 
     if (images.value.length >= maxImgs || files.length > maxImgs) {
@@ -32,6 +32,12 @@ const onFilePicked = async (event) => {
     }
     try {
         for (let file of files) {
+            if (file.size >= maxSize) {
+                toast().warning(
+                    `Файл ${file.name} слишком большой и не будет загружен`
+                );
+                continue;
+            }
             let url = URL.createObjectURL(file);
             images.value.push({
                 name: file.name,
@@ -40,6 +46,9 @@ const onFilePicked = async (event) => {
             });
         }
         for (let file of files) {
+            if (file.size >= maxSize) {
+                continue;
+            }
             images.value.find((el) => el.name == file.name).isLoaded =
                 await uploadImage(file);
         }
@@ -90,8 +99,12 @@ const handleAddProduct = async () => {
         toast().warning("Добавьте хотя бы одно фото");
         return;
     }
-    if (form.value.name == "" || form.value.price == "") {
-        toast().warning("Поля имени и цены не должны быть пустыми");
+    if (
+        form.value.name == "" ||
+        form.value.price == "" ||
+        form.value.description == ""
+    ) {
+        toast().warning("Поля имени, цены и описания не должны быть пустыми");
         return;
     }
     if (

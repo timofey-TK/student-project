@@ -8,6 +8,7 @@ import customSelect from "custom-select";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination } from "swiper";
 import "@/lib/isotop.js";
+import ProductModal from "./ProductModal.vue";
 
 const { products, getProducts, getCategories, categories, categorySelect } =
     UseDatabase();
@@ -117,8 +118,16 @@ onMounted(() => {
         }
     });
 });
+
+const currentProduct = ref(null),
+    isProductModal = ref(false);
 </script>
 <template>
+    <ProductModal
+        :product="currentProduct"
+        v-show="isProductModal"
+        @close="isProductModal = false"
+    />
     <section class="products-section" id="products-section">
         <div class="products-ui">
             <input
@@ -218,7 +227,13 @@ onMounted(() => {
                     <div class="image" v-else>
                         <img v-bind:src="product.photos[0]" alt="preview" />
                     </div>
-                    <div class="product-text">
+                    <div
+                        class="product-text"
+                        @click="
+                            isProductModal = true;
+                            currentProduct = product;
+                        "
+                    >
                         <p class="product-name">{{ product.name }}</p>
                         <p class="product-price">{{ product.price + "₽" }}</p>
                         <p class="product-description">
@@ -471,7 +486,6 @@ option {
         margin: 0 auto;
     }
     width: 100%;
-    overflow: hidden;
 }
 .product-card {
     background: #009f81;
@@ -482,9 +496,14 @@ option {
     overflow: hidden;
     height: fit-content;
     margin-bottom: 35px;
+    transition: transform ease 0.3s;
+    &:hover {
+        transform: scale(1.01);
+    }
 }
 
 .product-text {
+    cursor: pointer;
     color: #fff;
     padding: 0 13px;
 }
@@ -504,6 +523,7 @@ option {
     font-size: 16px;
 }
 .card-bottom {
+    column-gap: 5px;
     display: flex;
     justify-content: space-between;
 }
