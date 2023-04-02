@@ -1,17 +1,23 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { HvrSlider } from "@/lib/hvrSlider";
 import UseDatabase from "@/lib/UseDatabase";
 import useAuthUser from "@/lib/UseAuthUser";
 import { useToast as toast } from "vue-toastification";
 import customSelect from "custom-select";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination } from "swiper";
-import "@/lib/isotop.js";
+import Isotope from "isotope-layout";
 import ProductModal from "./ProductModal.vue";
 
-const { products, getProducts, getCategories, categories, categorySelect } =
-    UseDatabase();
+const {
+    products,
+    getProducts,
+    getCategories,
+    categories,
+    categorySelect,
+    deletedProducts,
+    addedProducts,
+} = UseDatabase();
 const { user } = useAuthUser();
 
 const options = {
@@ -32,7 +38,39 @@ function kitcut(text, limit) {
 }
 
 const searchInput = ref("");
-
+watch(addedProducts, () => {
+    try {
+        setTimeout(() => {
+            let last = document.querySelector(
+                ".product-card[data-id='" +
+                    products.value[products.value.length - 1].id +
+                    "']"
+            );
+            iso.insert(last);
+        }, 500);
+    } catch (error) {
+        console.log(error);
+    }
+});
+watch(deletedProducts, () => {
+    setTimeout(() => {
+        iso = new Isotope("#products", {
+            itemSelector: ".product-card",
+            getSortData: {
+                date: "[data-date]",
+            },
+            sortBy: "date",
+            sortAscending: false,
+            layoutMode: "masonry",
+            masonry: {
+                fitWidth: true,
+                columnWidth: ".product-card",
+                gutter: 35,
+            },
+        });
+        toast().success("Товар удален");
+    }, 600);
+});
 watch(categorySelect, (cat) => {
     try {
         document.querySelector(
@@ -80,10 +118,10 @@ function searchProducts(e) {
 
 const isEmpty = ref(true);
 let iso;
+
 onMounted(() => {
     getProducts().then(() => {
         setTimeout(() => {
-            new HvrSlider(".images");
             iso = new Isotope("#products", {
                 itemSelector: ".product-card",
                 getSortData: {
@@ -91,7 +129,6 @@ onMounted(() => {
                 },
                 sortBy: "date",
                 sortAscending: false,
-
                 layoutMode: "masonry",
                 masonry: {
                     fitWidth: true,
@@ -131,6 +168,7 @@ watch(isProductModal, () => {
         :product="currentProduct"
         v-show="isProductModal"
         @close="isProductModal = false"
+        @productAdd="triger()"
     />
     <section class="products-section" id="products-section">
         <div class="products-ui">
@@ -204,14 +242,23 @@ watch(isProductModal, () => {
             <div id="products" v-show="!isEmpty">
                 <div
                     class="product-card"
+                    @click.self="
+                        isProductModal = true;
+                        currentProduct = product;
+                    "
                     v-for="product in products"
                     :key="product.id"
+                    :data-id="product.id"
                     :data-date="product.date"
                     :data-category="product.category"
                     :data-name="product.name"
                     :data-user="product.user"
                 >
                     <swiper
+                        @click.self="
+                            isProductModal = true;
+                            currentProduct = product;
+                        "
                         :modules="[Navigation, Pagination]"
                         :slides-per-view="1"
                         :space-between="10"
@@ -228,7 +275,14 @@ watch(isProductModal, () => {
                             <img v-bind:src="src" alt="preview" />
                         </swiper-slide>
                     </swiper>
-                    <div class="image" v-else>
+                    <div
+                        class="image"
+                        v-else
+                        @click="
+                            isProductModal = true;
+                            currentProduct = product;
+                        "
+                    >
                         <img v-bind:src="product.photos[0]" alt="preview" />
                     </div>
                     <div
@@ -492,6 +546,7 @@ option {
     width: 100%;
 }
 .product-card {
+    cursor: pointer;
     background: #009f81;
     border-radius: 30px;
     width: 362px;
@@ -500,14 +555,13 @@ option {
     overflow: hidden;
     height: fit-content;
     margin-bottom: 35px;
-    transition: transform ease 0.3s;
+    transition: scale ease 0.3s;
     &:hover {
-        transform: scale(1.01);
+        scale: 1.01;
     }
 }
 
 .product-text {
-    cursor: pointer;
     color: #fff;
     padding: 0 13px;
 }

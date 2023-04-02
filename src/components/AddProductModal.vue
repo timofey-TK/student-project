@@ -63,7 +63,7 @@ const form = ref({
     user: null,
     description: "",
     photos: imagesList.value,
-    date: new Date().getTime(),
+    date: "",
     category: "0",
     socials: {
         tg: "",
@@ -73,28 +73,28 @@ const form = ref({
 });
 
 const clearForm = async (event) => {
+    images.value = [];
+    imagesList.value = [];
     form.value = {
         photos: imagesList.value,
         name: "",
         price: null,
         user: null,
         description: "",
-        date: new Date().toLocaleDateString("ru-Ru"),
-        category: "0",
+        date: "",
         socials: {
             tg: "",
             vk: "",
             wht: "",
         },
     };
-    images.value = [];
-    imagesList.value = [];
 };
 
 const isAddBtnDisabled = ref(false);
 const handleAddProduct = async () => {
     form.value.user = user.value.id;
     form.value.author = user.value.user_metadata.name;
+    form.value.date = new Date().getTime();
     if (form.value.photos.length == 0) {
         toast().warning("Добавьте хотя бы одно фото");
         return;

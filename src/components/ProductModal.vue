@@ -4,15 +4,20 @@ import Modal from "@/components/Modal.vue";
 import UseDatabase from "@/lib/UseDatabase";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Thumbs, Virtual } from "swiper";
+import useAuthUser from "@/lib/UseAuthUser";
+const { user } = useAuthUser();
 
 const props = defineProps(["product"]);
-const { categories } = UseDatabase();
-
+const { categories, deleteProduct } = UseDatabase();
+const emit = defineEmits(["close"]);
 const thumbsSwiper = ref(null);
 const setThumbsSwiper = (swiper) => {
     thumbsSwiper.value = swiper;
 };
-
+function handleDelete() {
+    deleteProduct(props.product.id);
+    emit("close");
+}
 function handleSocials(soc) {
     let link = "";
     if (soc == "tg") {
@@ -81,6 +86,14 @@ function handleSocials(soc) {
                     </div>
                     <div class="product-description">
                         {{ props.product?.description }}
+                    </div>
+                    <div
+                        class="delete-btn"
+                        v-if="user?.id == props.product?.user"
+                        @click="handleDelete"
+                    >
+                        <span>Удалить</span
+                        ><img src="@/assets/images/trash.svg" alt="" />
                     </div>
                 </div>
                 <div class="product-column-right">
@@ -178,6 +191,31 @@ function handleSocials(soc) {
 * {
     color: #676767 !important;
 }
+.delete-btn {
+    margin: 0;
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 20px;
+    background: #ff5252;
+    @include adaptiv-font(22, 18, 920, 320);
+    font-weight: 500;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    img {
+        height: 130%;
+    }
+    span {
+        color: #fff !important;
+    }
+    @media (max-width: 500px) {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+}
 .product-body {
     display: flex;
     justify-content: space-between;
@@ -254,6 +292,10 @@ function handleSocials(soc) {
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+    @media (max-width: 560px) {
+        margin: 0 auto;
+        margin-bottom: 20px;
     }
     @media (max-width: 470px) {
         width: 300px;
