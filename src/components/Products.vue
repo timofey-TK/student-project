@@ -9,15 +9,8 @@ import { Navigation, Pagination } from "swiper";
 import Isotope from "isotope-layout";
 import ProductModal from "./ProductModal.vue";
 
-const {
-    products,
-    getProducts,
-    getCategories,
-    categories,
-    categorySelect,
-    deletedProducts,
-    addedProducts,
-} = UseDatabase();
+const { products, getProducts, getCategories, categories, categorySelect } =
+    UseDatabase();
 const { user } = useAuthUser();
 
 const options = {
@@ -30,29 +23,13 @@ const options = {
 
 function kitcut(text, limit) {
     text = text.trim().split(" ");
-
     if (text.length <= limit) return text.join(" ");
     text = text.slice(0, limit);
-
     return text.join(" ") + "...";
 }
 
 const searchInput = ref("");
-watch(addedProducts, () => {
-    try {
-        setTimeout(() => {
-            let last = document.querySelector(
-                ".product-card[data-id='" +
-                    products.value[products.value.length - 1].id +
-                    "']"
-            );
-            iso.insert(last);
-        }, 500);
-    } catch (error) {
-        console.log(error);
-    }
-});
-watch(deletedProducts, () => {
+watch(products, () => {
     setTimeout(() => {
         iso = new Isotope("#products", {
             itemSelector: ".product-card",
@@ -68,9 +45,10 @@ watch(deletedProducts, () => {
                 gutter: 35,
             },
         });
-        toast().success("Товар удален");
-    }, 600);
+    }, 400);
+    iso.layout();
 });
+
 watch(categorySelect, (cat) => {
     try {
         document.querySelector(
@@ -311,6 +289,7 @@ watch(isProductModal, () => {
                 </div>
             </div>
         </Transition>
+        <!--  -->
     </section>
 </template>
 <style lang="scss">

@@ -120,23 +120,28 @@ const handleCategory = (id) => {
     color: #fff;
     font-weight: 500;
 }
+
 .avatar {
     width: 55px;
 }
+
 .account {
     display: flex;
     align-items: center;
     gap: 20px;
 }
+
 .account-name {
     text-align: right;
 }
+
 @media (max-width: 700px) {
     .account {
         justify-content: center;
         width: 100%;
     }
 }
+
 header {
     padding: 65px 0 0 0;
     min-height: 100vh;
@@ -194,6 +199,7 @@ nav {
     background-color: rgba(255, 255, 255, 0.5);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+
     @media (max-width: 800px) {
         padding: 13px 15px;
     }
@@ -394,6 +400,7 @@ nav button:not(.logout):hover {
     .buttons {
         gap: 20px;
     }
+
     .btn {
         border-radius: 30px;
     }

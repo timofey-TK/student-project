@@ -18,14 +18,6 @@ export default function UseDatabase() {
             'postgres_changes',
             { event: '*', schema: 'public', table: 'products_realtime' },
             (payload) => {
-                console.log(payload);
-                if (payload.eventType == "INSERT") {
-                    addedProducts.value += 1
-                }
-                else {
-                    deletedProducts.value = payload.old
-                }
-                console.log(deletedProducts.value, addedProducts.value);
                 getProducts()
             }
         )
